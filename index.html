@@ -63,7 +63,7 @@
             position: relative;
             z-index: 2;
             padding-bottom: 100px;
-            perspective: 1000px; /* Essential for CSS 3D */
+            perspective: 1000px;
         }
 
         section {
@@ -87,12 +87,11 @@
                 0 0 20px rgba(0, 210, 255, 0.2),
                 inset 0 0 20px rgba(0, 210, 255, 0.05);
             transform-style: preserve-3d;
-            transition: transform 0.1s ease-out; /* Smooth tilt */
+            transition: transform 0.1s ease-out;
             position: relative;
             overflow: hidden;
         }
 
-        /* Scanline effect */
         .holo-card::before {
             content: '';
             position: absolute;
@@ -106,7 +105,34 @@
         .holo-content {
             position: relative;
             z-index: 2;
-            transform: translateZ(30px); /* Pops text out 3D */
+            transform: translateZ(30px);
+        }
+
+        /* --- PROFILE IMAGE STYLING --- */
+        .profile-wrapper {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 25px auto;
+            position: relative;
+            border-radius: 50%;
+            padding: 5px; /* Space for the glowing ring */
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.5);
+            animation: pulseGlow 3s infinite alternate;
+        }
+
+        .profile-pic {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #000; /* Separates image from glowing ring */
+            background-color: #000;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 20px rgba(0, 210, 255, 0.3); }
+            100% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.6); }
         }
 
         /* --- TYPOGRAPHY --- */
@@ -136,9 +162,7 @@
 
         p { font-size: 1.2rem; line-height: 1.6; color: #e0e0e0; }
 
-        /* --- SPECIFIC COMPONENTS --- */
-        
-        /* Hero Badge */
+        /* --- COMPONENTS --- */
         .hero-badge {
             display: inline-block;
             background: rgba(255, 215, 0, 0.2);
@@ -151,7 +175,6 @@
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
         }
 
-        /* Timeline (Education) */
         .timeline-node {
             border-left: 2px solid var(--primary);
             padding-left: 20px;
@@ -170,7 +193,6 @@
             box-shadow: 0 0 10px var(--accent);
         }
 
-        /* Skill Bars (3D Style) */
         .skill-container {
             display: flex;
             flex-wrap: wrap;
@@ -196,7 +218,6 @@
             transform: translateZ(20px);
         }
 
-        /* Project Cards Grid */
         .grid-3d {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -215,7 +236,6 @@
             transform: translateY(-5px) scale(1.02);
         }
 
-        /* Contact & Buttons */
         .btn-container {
             display: flex; 
             justify-content: center; 
@@ -223,7 +243,6 @@
             margin-top: 30px; 
             flex-wrap: wrap;
         }
-
         .btn-3d {
             display: inline-flex;
             align-items: center;
@@ -246,7 +265,6 @@
             color: #000;
             box-shadow: 0 0 30px var(--accent);
         }
-
         .btn-secondary {
             border-color: var(--primary);
             color: var(--primary);
@@ -256,7 +274,6 @@
             color: #000;
             box-shadow: 0 0 30px var(--primary);
         }
-
         .btn-download {
             border-color: #fff;
             color: #fff;
@@ -267,20 +284,6 @@
             box-shadow: 0 0 30px #fff;
         }
 
-        /* --- ICONS & SURROGATES --- */
-        .floating-icon {
-            font-size: 3rem;
-            color: var(--accent);
-            margin-bottom: 20px;
-            animation: float 4s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-
-        /* Responsive */
         @media (max-width: 768px) {
             h1 { font-size: 2.5rem; }
             .holo-card { padding: 20px; }
@@ -302,13 +305,16 @@
         <section id="hero">
             <div class="holo-card tilt-target">
                 <div class="holo-content" style="text-align: center;">
-                    <i class="fa-solid fa-parachute-box floating-icon"></i>
+                    
+                    <div class="profile-wrapper">
+                        <img src="pavan.jpeg" alt="Pavan M G" class="profile-pic">
+                    </div>
                     <p class="hero-badge">MCA Professional | Python & AI</p>
                     <h1>PAVAN M G</h1>
                     <p>Full Stack Developer & Machine Learning Enthusiast</p>
                     
                     <div class="btn-container">
-                        <a href="path/to/your/resume.pdf" download class="btn-3d btn-download">
+                        <a href="pavanfull1.pdf" download class="btn-3d btn-download">
                             <i class="fa-solid fa-file-arrow-down"></i> Download CV
                         </a>
                         <a href="#projects" class="btn-3d">
@@ -332,7 +338,7 @@
                     <p>
                         I am a Full Stack and Front-End Developer skilled in building intelligent digital solutions. 
                         With a foundation in Physics and Computer Science, I am currently pursuing my MCA at Atria Institute of Technology. 
-                        My passion lies in bridging the gap between web development and Artificial Intelligence.
+                        My passion lives in bridging the gap between web development and Artificial Intelligence.
                     </p>
                     <br>
                     <p style="color: var(--primary);">
@@ -455,154 +461,99 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
-        // --- 1. THREE.JS BACKGROUND SETUP ---
+        // --- THREE.JS BACKGROUND SETUP ---
         const scene = new THREE.Scene();
-        // Fog creates the feeling of distance and seamless cloud generation
         scene.fog = new THREE.FogExp2(0x1e3c72, 0.002);
-
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        // --- 2. CREATE CLOUDS (Low Poly Geometries) ---
-        // We use Icosahedrons as abstract "low poly" clouds
         const cloudGeometry = new THREE.IcosahedronGeometry(1, 0);
-        const cloudMaterial = new THREE.MeshPhongMaterial({ 
-            color: 0xffffff, 
-            flatShading: true,
-            transparent: true,
-            opacity: 0.8
-        });
-
+        const cloudMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true, transparent: true, opacity: 0.8 });
         const clouds = [];
-        const cloudCount = 300; // Number of clouds
+        const cloudCount = 300;
 
         for (let i = 0; i < cloudCount; i++) {
             const mesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
-            
-            // Random positioning in a tunnel shape
             mesh.position.x = (Math.random() - 0.5) * 100;
             mesh.position.y = (Math.random() - 0.5) * 50;
-            mesh.position.z = (Math.random() - 0.5) * 200 - 100; // Spread deep into Z
-            
-            // Random scaling
+            mesh.position.z = (Math.random() - 0.5) * 200 - 100;
             const scale = Math.random() * 3 + 1;
             mesh.scale.set(scale, scale, scale);
-            
-            // Random rotation
             mesh.rotation.x = Math.random() * Math.PI;
             mesh.rotation.z = Math.random() * Math.PI;
-
             scene.add(mesh);
             clouds.push(mesh);
         }
 
-        // --- 3. LIGHTING ---
-        // Sun Light
         const ambientLight = new THREE.AmbientLight(0x555555);
         scene.add(ambientLight);
-
         const sunLight = new THREE.PointLight(0xFFD700, 1.5, 200);
         sunLight.position.set(20, 20, 50);
         scene.add(sunLight);
-
-        // Sun Mesh (Visual only)
         const sunGeo = new THREE.SphereGeometry(5, 32, 32);
         const sunMat = new THREE.MeshBasicMaterial({ color: 0xFFD700 });
         const sun = new THREE.Mesh(sunGeo, sunMat);
-        sun.position.set(20, 20, -150); // Far back
+        sun.position.set(20, 20, -150);
         scene.add(sun);
-
         camera.position.z = 5;
 
-        // --- 4. ANIMATION LOOP ---
         let scrollSpeed = 0;
-        
         function animate() {
             requestAnimationFrame(animate);
-
-            // Rotate clouds slowly
             clouds.forEach(cloud => {
                 cloud.rotation.x += 0.001;
                 cloud.rotation.y += 0.002;
-                
-                // Move clouds towards camera based on scroll + base speed
                 cloud.position.z += 0.1 + (scrollSpeed * 0.5);
-
-                // Reset cloud if it passes camera
                 if (cloud.position.z > 10) {
                     cloud.position.z = -200;
                     cloud.position.x = (Math.random() - 0.5) * 100;
                     cloud.position.y = (Math.random() - 0.5) * 50;
                 }
             });
-
             renderer.render(scene, camera);
         }
         animate();
 
-        // --- 5. SCROLL & INTERACTION LOGIC ---
-        
-        // Update flight speed based on scroll
         window.addEventListener('scroll', () => {
             const totalHeight = document.body.scrollHeight - window.innerHeight;
             const progress = (window.scrollY / totalHeight) * 100;
-            
-            // Update progress bar
             document.getElementById('progress-bar').style.height = progress + '%';
-            
-            // Add burst of speed to clouds
             scrollSpeed = 1; 
-            
-            // Debounce to slow down after scrolling stops
             clearTimeout(window.scrollTimeout);
-            window.scrollTimeout = setTimeout(() => {
-                scrollSpeed = 0;
-            }, 100);
+            window.scrollTimeout = setTimeout(() => { scrollSpeed = 0; }, 100);
         });
 
-        // Handle Resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // --- 6. HOLOGRAPHIC TILT EFFECT (CSS 3D) ---
         const cards = document.querySelectorAll('.tilt-target');
-
         document.addEventListener('mousemove', (e) => {
-            // Parallax Camera Movement in Three.js
             const mouseX = (e.clientX / window.innerWidth) * 2 - 1;
             const mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-            
             camera.position.x = mouseX * 2;
             camera.position.y = mouseY * 1;
             camera.lookAt(0, 0, -50);
-
-            // CSS Card Tilt
+            
             cards.forEach(card => {
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-                
-                // Only animate if mouse is near the card
                 if (x > -100 && x < rect.width + 100 && y > -100 && y < rect.height + 100) {
                      const centerX = rect.width / 2;
                     const centerY = rect.height / 2;
-                    
                     const rotateX = ((y - centerY) / centerY) * -5;
                     const rotateY = ((x - centerX) / centerX) * 5;
-
                     card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
                 } else {
                     card.style.transform = `perspective(1000px) rotateX(0) rotateY(0)`;
                 }
             });
         });
-
     </script>
 </body>
 </html>
