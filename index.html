@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pavan M G | 3D Interactive Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #00d2ff;
+            --secondary: #3a7bd5;
+            --accent: #ffd700;
+            --glass: rgba(20, 30, 48, 0.6);
+            --glass-border: rgba(0, 210, 255, 0.3);
+            --text-glow: 0 0 10px rgba(0, 210, 255, 0.7);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            overflow-x: hidden;
+            background-color: #000;
+            font-family: 'Rajdhani', sans-serif;
+            color: #fff;
+        }
+
+        /* --- 3D CANVAS BACKGROUND --- */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+            background: radial-gradient(circle at center, #1e3c72 0%, #000000 100%);
+        }
+
+        /* --- SCROLL PROGRESS BAR --- */
+        .flight-meter {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 200px;
+            width: 4px;
+            background: rgba(255,255,255,0.1);
+            z-index: 100;
+            border-radius: 2px;
+        }
+        .flight-progress {
+            width: 100%;
+            background: var(--accent);
+            height: 0%;
+            box-shadow: 0 0 10px var(--accent);
+            transition: height 0.1s;
+        }
+
+        /* --- MAIN LAYOUT --- */
+        main {
+            position: relative;
+            z-index: 2;
+            padding-bottom: 100px;
+            perspective: 1000px; /* Essential for CSS 3D */
+        }
+
+        section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* --- 3D HOLOGRAPHIC CARDS --- */
+        .holo-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 1000px;
+            width: 100%;
+            box-shadow: 
+                0 0 20px rgba(0, 210, 255, 0.2),
+                inset 0 0 20px rgba(0, 210, 255, 0.05);
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out; /* Smooth tilt */
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Scanline effect */
+        .holo-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 210, 255, 0.03) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .holo-content {
+            position: relative;
+            z-index: 2;
+            transform: translateZ(30px); /* Pops text out 3D */
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1, h2, h3 {
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            text-shadow: var(--text-glow);
+            background: linear-gradient(90deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--glass-border);
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+
+        p { font-size: 1.2rem; line-height: 1.6; color: #e0e0e0; }
+
+        /* --- SPECIFIC COMPONENTS --- */
+        
+        /* Hero Badge */
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        /* Timeline (Education) */
+        .timeline-node {
+            border-left: 2px solid var(--primary);
+            padding-left: 20px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        .timeline-node::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        /* Skill Bars (3D Style) */
+        .skill-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .skill-chip {
+            background: rgba(0, 210, 255, 0.1);
+            border: 1px solid var(--primary);
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+            cursor: default;
+        }
+        .skill-chip:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 15px var(--primary);
+            transform: translateZ(20px);
+        }
+
+        /* Project Cards Grid */
+        .grid-3d {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        .mini-card {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            transition: 0.4s;
+        }
+        .mini-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent);
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        /* Contact & Buttons */
+        .btn-container {
+            display: flex; 
+            justify-content: center; 
+            gap: 20px; 
+            margin-top: 30px; 
+            flex-wrap: wrap;
+        }
+
+        .btn-3d {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 40px;
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-family: 'Orbitron', sans-serif;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .btn-3d:hover {
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 30px var(--accent);
+        }
+
+        .btn-secondary {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 30px var(--primary);
+        }
+
+        .btn-download {
+            border-color: #fff;
+            color: #fff;
+        }
+        .btn-download:hover {
+            background: #fff;
+            color: #000;
+            box-shadow: 0 0 30px #fff;
+        }
+
+        /* --- ICONS & SURROGATES --- */
+        .floating-icon {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .holo-card { padding: 20px; }
+            .btn-container { flex-direction: column; align-items: center; }
+            .btn-3d { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div class="flight-meter">
+        <div class="flight-progress" id="progress-bar"></div>
+    </div>
+
+    <main>
+        
+        <section id="hero">
+            <div class="holo-card tilt-target">
+                <div class="holo-content" style="text-align: center;">
+                    <i class="fa-solid fa-parachute-box floating-icon"></i>
+                    <p class="hero-badge">MCA Professional | Python & AI</p>
+                    <h1>PAVAN M G</h1>
+                    <p>Full Stack Developer & Machine Learning Enthusiast</p>
+                    
+                    <div class="btn-container">
+                        <a href="path/to/your/resume.pdf" download class="btn-3d btn-download">
+                            <i class="fa-solid fa-file-arrow-down"></i> Download CV
+                        </a>
+                        <a href="#projects" class="btn-3d">
+                            View Missions
+                        </a>
+                        <a href="#contact" class="btn-3d btn-secondary">
+                            Contact
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about">
+            <div class="holo-card tilt-target">
+                <div class="holo-content">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <h2><i class="fa-solid fa-user-astronaut"></i> About Me</h2>
+                        <i class="fa-solid fa-dove" style="font-size: 2rem; color: rgba(255,255,255,0.3);"></i>
+                    </div>
+                    <p>
+                        I am a Full Stack and Front-End Developer skilled in building intelligent digital solutions. 
+                        With a foundation in Physics and Computer Science, I am currently pursuing my MCA at Atria Institute of Technology. 
+                        My passion lies in bridging the gap between web development and Artificial Intelligence.
+                    </p>
+                    <br>
+                    <p style="color: var(--primary);">
+                        <i class="fa-solid fa-microchip"></i> <strong>Core Focus:</strong> AI-Driven Web Apps, Data Analysis, Neural Networks.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="education">
+            <div class="holo-card tilt-target">
+                <div class="holo-content">
+                    <h2><i class="fa-solid fa-graduation-cap"></i> Flight Path</h2>
+                    
+                    <div class="timeline-node">
+                        <h3 style="color: var(--primary);">Master of Computer Applications</h3>
+                        <p>Atria Institute of Technology, Bengaluru</p>
+                        <p style="font-size: 0.9rem; opacity: 0.7;">Dec 2024 – Present | GPA: 8.7</p>
+                    </div>
+
+                    <div class="timeline-node">
+                        <h3 style="color: var(--primary);">B.Sc in Physics & CS</h3>
+                        <p>Government First Grade College, Tumkur University</p>
+                        <p style="font-size: 0.9rem; opacity: 0.7;">Oct 2021 – Aug 2024 | GPA: 7.71</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="skills">
+            <div class="holo-card tilt-target">
+                <div class="holo-content">
+                    <h2><i class="fa-solid fa-rocket"></i> Arsenal</h2>
+                    
+                    <h4 style="margin-top: 20px; color: #aaa;">Languages & DB</h4>
+                    <div class="skill-container">
+                        <div class="skill-chip"><i class="fa-brands fa-python"></i> Python</div>
+                        <div class="skill-chip"><i class="fa-brands fa-react"></i> React.js</div>
+                        <div class="skill-chip"><i class="fa-brands fa-js"></i> JavaScript</div>
+                        <div class="skill-chip"><i class="fa-brands fa-html5"></i> HTML/CSS</div>
+                        <div class="skill-chip"><i class="fa-solid fa-database"></i> MongoDB</div>
+                        <div class="skill-chip"><i class="fa-solid fa-server"></i> MySQL</div>
+                    </div>
+
+                    <h4 style="margin-top: 20px; color: #aaa;">Frameworks & Tools</h4>
+                    <div class="skill-container">
+                        <div class="skill-chip"><i class="fa-solid fa-brain"></i> Scikit-learn</div>
+                        <div class="skill-chip"><i class="fa-solid fa-network-wired"></i> TensorFlow</div>
+                        <div class="skill-chip">Flask</div>
+                        <div class="skill-chip">Pandas</div>
+                        <div class="skill-chip">NumPy</div>
+                        <div class="skill-chip">Git/GitHub</div>
+                        <div class="skill-chip">Streamlit</div>
+                    </div>
+
+                    <h4 style="margin-top: 20px; color: #aaa;">Soft Skills</h4>
+                    <div class="skill-container">
+                        <div class="skill-chip" style="border-color: var(--accent); color: var(--accent);">Critical Thinking</div>
+                        <div class="skill-chip" style="border-color: var(--accent); color: var(--accent);">Problem Solving</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects">
+            <div class="holo-card tilt-target">
+                <div class="holo-content">
+                    <h2><i class="fa-solid fa-code-branch"></i> Missions</h2>
+                    <div class="grid-3d">
+                        
+                        <div class="mini-card">
+                            <h3 style="color: var(--primary);">AI Fitness Coach</h3>
+                            <p style="font-size: 0.85rem; color: var(--accent); margin: 5px 0;">OpenCV | Mediapipe | Python</p>
+                            <p style="font-size: 0.9rem;">
+                                Real-time pose detection system. Enables accurate joint tracking and form-validation during workouts using adaptive image analytics.
+                            </p>
+                        </div>
+
+                        <div class="mini-card">
+                            <h3 style="color: var(--primary);">Receipt Analyzer</h3>
+                            <p style="font-size: 0.85rem; color: var(--accent); margin: 5px 0;">Streamlit | OCR | SQLite</p>
+                            <p style="font-size: 0.9rem;">
+                                Full Stack OCR app. Uploads receipts, extracts vendor/amount data, and visualizes monthly spending trends.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <div class="holo-card tilt-target" style="text-align: center;">
+                <div class="holo-content">
+                    <h2><i class="fa-solid fa-satellite-dish"></i> Establish Comms</h2>
+                    <p style="margin-bottom: 30px;">Ready to collaborate on the next big innovation?</p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 15px; align-items: center;">
+                        <a href="mailto:pavanmg9964@gmail.com" class="btn-3d" style="width: 100%; max-width: 400px;">
+                            <i class="fa-solid fa-envelope"></i> pavanmg9964@gmail.com
+                        </a>
+                        <a href="tel:+916360270028" class="btn-3d" style="width: 100%; max-width: 400px;">
+                            <i class="fa-solid fa-phone"></i> +91 6360270028
+                        </a>
+                        <div style="display: flex; gap: 15px; width: 100%; max-width: 400px;">
+                            <a href="https://linkedin.com" target="_blank" class="btn-3d btn-secondary" style="flex: 1;">
+                                <i class="fa-brands fa-linkedin"></i> LinkedIn
+                            </a>
+                            <a href="https://github.com/pavanpavumg" target="_blank" class="btn-3d btn-secondary" style="flex: 1;">
+                                <i class="fa-brands fa-github"></i> GitHub
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // --- 1. THREE.JS BACKGROUND SETUP ---
+        const scene = new THREE.Scene();
+        // Fog creates the feeling of distance and seamless cloud generation
+        scene.fog = new THREE.FogExp2(0x1e3c72, 0.002);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // --- 2. CREATE CLOUDS (Low Poly Geometries) ---
+        // We use Icosahedrons as abstract "low poly" clouds
+        const cloudGeometry = new THREE.IcosahedronGeometry(1, 0);
+        const cloudMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0xffffff, 
+            flatShading: true,
+            transparent: true,
+            opacity: 0.8
+        });
+
+        const clouds = [];
+        const cloudCount = 300; // Number of clouds
+
+        for (let i = 0; i < cloudCount; i++) {
+            const mesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
+            
+            // Random positioning in a tunnel shape
+            mesh.position.x = (Math.random() - 0.5) * 100;
+            mesh.position.y = (Math.random() - 0.5) * 50;
+            mesh.position.z = (Math.random() - 0.5) * 200 - 100; // Spread deep into Z
+            
+            // Random scaling
+            const scale = Math.random() * 3 + 1;
+            mesh.scale.set(scale, scale, scale);
+            
+            // Random rotation
+            mesh.rotation.x = Math.random() * Math.PI;
+            mesh.rotation.z = Math.random() * Math.PI;
+
+            scene.add(mesh);
+            clouds.push(mesh);
+        }
+
+        // --- 3. LIGHTING ---
+        // Sun Light
+        const ambientLight = new THREE.AmbientLight(0x555555);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.PointLight(0xFFD700, 1.5, 200);
+        sunLight.position.set(20, 20, 50);
+        scene.add(sunLight);
+
+        // Sun Mesh (Visual only)
+        const sunGeo = new THREE.SphereGeometry(5, 32, 32);
+        const sunMat = new THREE.MeshBasicMaterial({ color: 0xFFD700 });
+        const sun = new THREE.Mesh(sunGeo, sunMat);
+        sun.position.set(20, 20, -150); // Far back
+        scene.add(sun);
+
+        camera.position.z = 5;
+
+        // --- 4. ANIMATION LOOP ---
+        let scrollSpeed = 0;
+        
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Rotate clouds slowly
+            clouds.forEach(cloud => {
+                cloud.rotation.x += 0.001;
+                cloud.rotation.y += 0.002;
+                
+                // Move clouds towards camera based on scroll + base speed
+                cloud.position.z += 0.1 + (scrollSpeed * 0.5);
+
+                // Reset cloud if it passes camera
+                if (cloud.position.z > 10) {
+                    cloud.position.z = -200;
+                    cloud.position.x = (Math.random() - 0.5) * 100;
+                    cloud.position.y = (Math.random() - 0.5) * 50;
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // --- 5. SCROLL & INTERACTION LOGIC ---
+        
+        // Update flight speed based on scroll
+        window.addEventListener('scroll', () => {
+            const totalHeight = document.body.scrollHeight - window.innerHeight;
+            const progress = (window.scrollY / totalHeight) * 100;
+            
+            // Update progress bar
+            document.getElementById('progress-bar').style.height = progress + '%';
+            
+            // Add burst of speed to clouds
+            scrollSpeed = 1; 
+            
+            // Debounce to slow down after scrolling stops
+            clearTimeout(window.scrollTimeout);
+            window.scrollTimeout = setTimeout(() => {
+                scrollSpeed = 0;
+            }, 100);
+        });
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // --- 6. HOLOGRAPHIC TILT EFFECT (CSS 3D) ---
+        const cards = document.querySelectorAll('.tilt-target');
+
+        document.addEventListener('mousemove', (e) => {
+            // Parallax Camera Movement in Three.js
+            const mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            const mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+            
+            camera.position.x = mouseX * 2;
+            camera.position.y = mouseY * 1;
+            camera.lookAt(0, 0, -50);
+
+            // CSS Card Tilt
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                // Only animate if mouse is near the card
+                if (x > -100 && x < rect.width + 100 && y > -100 && y < rect.height + 100) {
+                     const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    const rotateX = ((y - centerY) / centerY) * -5;
+                    const rotateY = ((x - centerX) / centerX) * 5;
+
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                } else {
+                    card.style.transform = `perspective(1000px) rotateX(0) rotateY(0)`;
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
